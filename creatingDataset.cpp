@@ -39,7 +39,7 @@ void creatingHeaderForCSVFile(string fileName, string proteinList){
         else if(i >= proteinConsecutiveStartColumn && i <= proteinConsecutiveEndColumn){
             fw << "f" << i << "(" << duoComb[i - proteinConsecutiveStartColumn]<<"),";
         }
-        else if(i >= proteinConsecutiveStartColumn && i <= proteinConsecutiveEndColumn){
+        else if(i >= protein1SpacedStartColumn && i <= protein1SpacedEndColumn){
             fw << "f" << i << "(" << duoComb[i - protein1SpacedStartColumn]<<"),";
         }
         else{
@@ -90,7 +90,9 @@ void printInFileFloat(int letter, string left, string right,string feature1, str
 
     map<string, int>::iterator itr2;
     for(itr2 = kSpacedFrequency1.begin(); itr2 != kSpacedFrequency1.end(); itr2++){
-        fw << itr->second << ",";
+        fw << itr2->second << ",";
+
+        // cout << itr2->second << ",";
     }
     
     // int extraStart = 424;
@@ -572,6 +574,7 @@ void datasetFloatCreateCoreAlgo(string seq, string output, int maxSide, string f
         map <string, int> duoFrequencey = getDuoCombinationFrequency(left, right, proteinDuoCombination);
         int k = 1;
         map <string, int> kSpacedFrequency1 = getKSpacedCombFrequency(left, right, proteinDuoCombination, k);
+        
         printInFileFloat(letter,  left,  right, feature1,  feature2,  feature3, V, duoFrequencey, kSpacedFrequency1, o, fileName);
 
         // print( letter,  feature1,  feature2, feature3,  feature4,  feature5,  o);
@@ -636,9 +639,9 @@ int main(){
   
     // else
     //     cout << "Directory created";
-
-    string inputFile = "test.txt";
-    char destinationFolder[] = "test";
+    
+    string inputFile = "data.txt";
+    char destinationFolder[] = "data";
     string destFolder = convertArraytoString(destinationFolder);
     cout << "The destination folder is " << destFolder;
     mkdir(destinationFolder);
