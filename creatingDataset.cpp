@@ -17,9 +17,23 @@ vector <string> getTrioComb(string proteinList);
 // void print(char letter, string feature1, string feature2,string feature3, int feature4, string feature5, char output){
 //     cout << letter << "," << feature1 << "," << feature2 << "," << feature3 << "," << feature4 << "," << feature5 << "," << output << endl;
 // }
+vector<string> split(string s, string delimiter){
+    while(s[s.size()-1]  == ' '){
+        s.erase(s.size()-1);
+    }
+    vector<string> A;
+    size_t pos = 0;
+    while( (pos = s.find(delimiter)) != string::npos ){
+
+        A.push_back(s.substr(0, pos));
+        s.erase(0, pos + delimiter.size());
+    }
+    A.push_back(s);
+    return A;
+}
 
 void creatingHeaderForCSVFile(string fileName, string proteinList){
-    int featureSize = 8824;
+    int featureSize = 8836;
     int proteinFeatureStartColumn = 4;
     int proteinFeatureEndColumn = 23;
     int proteinConsecutiveStartColumn = 24;
@@ -28,6 +42,8 @@ void creatingHeaderForCSVFile(string fileName, string proteinList){
     int protein1SpacedEndColumn = 823;
     int protein1SpacedTrimerStartColumn1 = 824;
     int protein1SpacedTrimerEndColumn1 = 8823;
+    int proteinSpiderStartColumn = 8824;
+    int proteinSpiderEndColumn = 8835;
     // int protein1SpacedTrimerStartColumn2 = 8824;
     // int protein1SpacedTrimerEndColumn2 = 16823;
     vector <string> duoComb = getDuoComb(proteinList);
@@ -88,7 +104,7 @@ void printInFile(char letter, string left, string right,string feature1, string 
 
 }
 
-void printInFileFloat(int letter, string left, string right,string feature1, string feature2, int feature3, vector<int> V, map<string, int> duoFrequency, map <string, int> kSpacedFrequency1, map <string, int> trioFrequency1, map <string, int> trioFrequency2, char output, string fileName){
+void printInFileFloat(int letter, string left, string right,string feature1, string feature2, int feature3, vector<int> V, map<string, int> duoFrequency, map <string, int> kSpacedFrequency1, map <string, int> trioFrequency1, map <string, int> trioFrequency2, vector <string> spiderFeatures, char output, string fileName){
     ofstream fw;
     fw.open(fileName, ios_base::app);
     fw << letter << "," << feature1 << "," << feature2 << "," << feature3 << ",";
@@ -111,6 +127,11 @@ void printInFileFloat(int letter, string left, string right,string feature1, str
         fw << itr->second << ",";
     }
     
+    cout << "Spider features " ;
+    for (int i = 0; i < spiderFeatures.size(); i++){
+        fw << spiderFeatures[i] << ",";
+        // cout << spiderFeatures[i] << ",";
+    }
     // for(itr = trioFrequency2.begin(); itr != trioFrequency2.end(); itr++){
     //     fw << itr->second << ",";
     // }
@@ -594,7 +615,55 @@ int getProteinNumber(string proteinList, char c){
     return -1;
 }
 
-void datasetFloatCreateCoreAlgo(string seq, string output, int maxSide, string fileName, string proteinList){
+vector <string> getSpiderBasedFeatures(string filePath, int aminoAcidNumber){
+    ifstream fr(filePath);
+    string s;
+    int i = 0;
+    string aminoAcidNumberStr = to_string(aminoAcidNumber);
+    while (getline(fr, s))
+    {
+        // cout << s << endl;
+        vector < string > V;
+        V = split(s, "\t");
+        vector <string> sf; //spider feature
+        if (V[0] == aminoAcidNumberStr){
+            if (V[2] == "C"){
+                sf.push_back("1");
+                sf.push_back("0");
+                sf.push_back("0");
+            }
+            else if(V[2] == "E"){
+                sf.push_back("0");
+                sf.push_back("1");
+                sf.push_back("0");
+            }
+            else if(V[2] == "H"){
+                sf.push_back("0");
+                sf.push_back("0");
+                sf.push_back("1");
+            }
+
+            sf.push_back(V[6]); //ASA pushed to vector
+            double theta = stod(V[7]);
+            double tau = stod(V[8]);
+            double phi = stod(V[9]);
+            double psi = stod(V[10]);
+            sf.push_back(to_string(sin(theta)));
+            sf.push_back(to_string(sin(tau)));
+            sf.push_back(to_string(sin(phi)));
+            sf.push_back(to_string(sin(psi)));
+
+            sf.push_back(to_string(cos(theta)));
+            sf.push_back(to_string(cos(tau)));
+            sf.push_back(to_string(cos(phi)));
+            sf.push_back(to_string(cos(psi)));
+
+            return sf;
+        }
+    }
+}
+
+void datasetFloatCreateCoreAlgo(string seq, string output, int maxSide, string fileName, string proteinList, string proteinSequenceFileName){
     for (int i = 0; i < seq.size(); i ++){
         // if(output[i] == '0'){
         //     continue;
@@ -666,13 +735,25 @@ void datasetFloatCreateCoreAlgo(string seq, string output, int maxSide, string f
         map <string, int> kSpacedFrequency2 = getKSpacedTrioCombFrequency1(left, right, proteinTrioCombination, 1);
         map <string, int> kSpacedFrequency3 = getKSpacedTrioCombFrequency2(left, right, proteinTrioCombination, 1);
 
-        printInFileFloat(letter,  left,  right, feature1,  feature2,  feature3, V, duoFrequencey, kSpacedFrequency1, kSpacedFrequency2, kSpacedFrequency3, o, fileName);
+        vector< string> spiderFeatures = getSpiderBasedFeatures("SPIDER/" + proteinSequenceFileName, i + 1);
+        // cout << "The spider size is " << spiderFeatures.size() << endl;
+        printInFileFloat(letter,  left,  right, feature1,  feature2,  feature3, V, duoFrequencey, kSpacedFrequency1, kSpacedFrequency2, kSpacedFrequency3,spiderFeatures,  o, fileName);
 
         // print( letter,  feature1,  feature2, feature3,  feature4,  feature5,  o);
         // printInFile(letter,  feature1,  feature2, feature3,  feature4,  feature5,  o, "dataset.txt");
         // cout << "\nFor i = " << i << "\nLetter = " << seq[i]  <<  " Left = " << left << " Right = " << right << "\nThe whole string = " << ws << "\nThe redundency = " << checkRedundency(left, right, seq[i]) << endl <<"The majority" << checkMajorVorC(ws, 'a') << endl;
         
     }
+}
+
+string getProteinFileName(string s){
+    vector <string> proteinSequenceName;
+    proteinSequenceName = split(s, " ");
+    proteinSequenceName[0].erase(0, 1);
+    cout << proteinSequenceName[0] << endl;
+    string proteinSequenceFileName;
+    proteinSequenceFileName = proteinSequenceName[0] + ".txt";
+    return proteinSequenceFileName;
 }
 
 void createCombinedFloatDataset(string inputFile, string destFolder){
@@ -699,6 +780,10 @@ void createCombinedFloatDataset(string inputFile, string destFolder){
     creatingHeaderForCSVFile(finalFileName, proteinList);
     while(getline(fr, line1)){
         i++;
+        cout << line1 << endl;
+        string proteinSequenceFileName = getProteinFileName(line1);
+        cout << " The file name is " << proteinSequenceFileName << endl;
+        // break;
         getline(fr, sequence);
         getline(fr, output);
         fixSequence(sequence, output, proteinList); 
@@ -710,7 +795,7 @@ void createCombinedFloatDataset(string inputFile, string destFolder){
         else{
             
             // combinedDatasets(sequence, output, neighbourSize, finalFileName, proteinList);
-            datasetFloatCreateCoreAlgo( sequence,  output,  neighbourSize,  finalFileName, proteinList);
+            datasetFloatCreateCoreAlgo( sequence,  output,  neighbourSize,  finalFileName, proteinList, proteinSequenceFileName);
             cout<<"\n\nDataset create and merge of sequence " << i << " DONE!!!" << endl;
         }
         

@@ -125,17 +125,31 @@ map <string, int> getKSpacedTrioCombFrequency2(string left, string right, vector
     return M;
 }
 
+vector<string> split(string s, string delimiter){
+    while(s[s.size()-1]  == ' '){
+        s.erase(s.size()-1);
+    }
+    vector<string> A;
+    size_t pos = 0;
+    while( (pos = s.find(delimiter)) != string::npos ){
+
+        A.push_back(s.substr(0, pos));
+        s.erase(0, pos + delimiter.size());
+    }
+    A.push_back(s);
+    return A;
+}
 
 /////
 int main()
 {
 
-    map<string, int> M;
-    string proteinList = "ARNDCEQGHILKMFPSTWYV";
-    vector<string> V =  getTrioComb(proteinList);
-    for(int i = 0; i < V.size(); i++){
-        cout << V[i] << endl;
-    }
+    // map<string, int> M;
+    // string proteinList = "ARNDCEQGHILKMFPSTWYV";
+    // vector<string> V =  getTrioComb(proteinList);
+    // for(int i = 0; i < V.size(); i++){
+    //     cout << V[i] << endl;
+    // }
     // M = getKSpacedCombFrequency("AAAA", "AAAA", getDuoComb(proteinList), 1);
     // map< string, int>::iterator itr;
     // for(itr = M.begin(); itr != M.end(); itr++){
@@ -147,4 +161,31 @@ int main()
     // for (int i = 0; i < V.size(); i++){
     //     cout << V[i] << " ";
     // }
+    // ifstream fr("spider/1abrb.txt");
+    // string s;
+    // int i = 0;
+    // while (getline(fr, s))
+    // {
+    //     // cout << s << endl;
+    //     vector < string > V;
+    //     V = split(s, "\t");
+    //     vector < string > :: iterator it;
+    //     // for (it = V.begin(); it != V.end(); it++){
+    //     //     if (*it == " "){
+    //     //         V.erase(it);
+    //     //     }
+    //     // }
+    //     cout << " THe size is " << V.size() << endl;
+    //     // for (int j = 0; j < V.size(); j++){
+    //     //     cout << V[j] << "\t";
+    //     // }
+    //     cout << V[10];
+    //     cout << endl;
+    //     if(i == 0){
+    //         break;
+    //     }
+    //     i++;
+    // }
+    cout << sin(114);
+    
 }
