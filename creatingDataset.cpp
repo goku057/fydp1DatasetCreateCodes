@@ -127,7 +127,7 @@ void printInFileFloat(int letter, string left, string right,string feature1, str
         fw << itr->second << ",";
     }
     
-    cout << "Spider features " ;
+    //cout << "Spider features " ;
     for (int i = 0; i < spiderFeatures.size(); i++){
         fw << spiderFeatures[i] << ",";
         // cout << spiderFeatures[i] << ",";
